@@ -1,0 +1,32 @@
+import { motion, useReducedMotion } from 'framer-motion'
+import Container from './Container'
+
+function PageHeader({ eyebrow, title, subtitle }) {
+  const reduceMotion = useReducedMotion()
+
+  const animation = reduceMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 16 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.45, ease: 'easeOut' },
+      }
+
+  return (
+    <section className="pb-10 pt-16 sm:pb-12 sm:pt-20 lg:pb-14 lg:pt-24">
+      <Container>
+        <motion.div className="max-w-4xl" {...animation}>
+          <p className="inline-flex rounded-full border border-[#1DA1FF]/30 bg-[#1DA1FF]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#89D7FF]">
+            {eyebrow}
+          </p>
+          <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight text-[#EAF0FF] sm:text-5xl lg:text-6xl">
+            {title}
+          </h1>
+          <p className="mt-5 max-w-3xl text-base leading-relaxed text-[#A9B4D0] sm:text-lg">{subtitle}</p>
+        </motion.div>
+      </Container>
+    </section>
+  )
+}
+
+export default PageHeader
