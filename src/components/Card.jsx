@@ -1,16 +1,34 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 function Card({ children, className = '', tilt = false, glow = false, ...props }) {
   const reduceMotion = useReducedMotion()
-  const [transformStyle, setTransformStyle] = useState({})
+  const cardRef = useRef(null)
+  const frameRef = useRef(0)
+  const nextTransformRef = useRef('')
 
-  const motionProps = reduceMotion
+  useEffect(
+    () => () => {
+      if (frameRef.current) {
+        window.cancelAnimationFrame(frameRef.current)
+      }
+    },
+    [],
+  )
+
+  const motionProps = reduceMotion || tilt
     ? {}
     : {
         whileHover: { y: -4 },
         transition: { type: 'spring', stiffness: 260, damping: 22 },
       }
+
+  const applyTransform = () => {
+    if (cardRef.current) {
+      cardRef.current.style.transform = nextTransformRef.current
+    }
+    frameRef.current = 0
+  }
 
   const handleMouseMove = (event) => {
     if (!tilt || reduceMotion) return
@@ -21,20 +39,27 @@ function Card({ children, className = '', tilt = false, glow = false, ...props }
     const rotateX = ((y / bounds.height) * 2 - 1) * -4
     const rotateY = ((x / bounds.width) * 2 - 1) * 5
 
-    setTransformStyle({
-      transform: `perspective(900px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`,
-    })
+    nextTransformRef.current = `perspective(900px) translateY(-4px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`
+    if (!frameRef.current) {
+      frameRef.current = window.requestAnimationFrame(applyTransform)
+    }
   }
 
   const handleMouseLeave = () => {
     if (!tilt || reduceMotion) return
-    setTransformStyle({})
+    if (frameRef.current) {
+      window.cancelAnimationFrame(frameRef.current)
+      frameRef.current = 0
+    }
+    if (cardRef.current) {
+      cardRef.current.style.transform = ''
+    }
   }
 
   return (
     <motion.div
-      className={`glass-card rounded-3xl p-6 ${glow ? 'card-glow' : ''} ${className}`}
-      style={transformStyle}
+      ref={cardRef}
+      className={`glass-card rounded-3xl p-6 ${glow ? 'card-glow' : ''} ${tilt ? 'will-change-transform' : ''} ${className}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       {...motionProps}

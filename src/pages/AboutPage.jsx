@@ -22,6 +22,7 @@ import Card from '../components/Card'
 import Container from '../components/Container'
 import CtaBanner from '../components/CtaBanner'
 import PageHeader from '../components/PageHeader'
+import PageWrapper from '../components/PageWrapper'
 import SectionTitle from '../components/SectionTitle'
 import { companyStats, missionVision, techStack, whyChooseUs } from '../data/about'
 
@@ -100,7 +101,7 @@ function AboutPage() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <>
+    <PageWrapper>
       <PageHeader
         eyebrow="About"
         title="We are a product-first software company focused on outcomes, not output."
@@ -218,7 +219,7 @@ function AboutPage() {
       </section>
 
       <CtaBanner />
-    </>
+    </PageWrapper>
   )
 }
 

@@ -1,10 +1,11 @@
 import CtaBanner from '../components/CtaBanner'
 import PageHeader from '../components/PageHeader'
+import PageWrapper from '../components/PageWrapper'
 import Work from '../components/Work'
 
 function WorkPage() {
   return (
-    <>
+    <PageWrapper>
       <PageHeader
         eyebrow="Portfolio"
         title="Case studies showing real product and growth outcomes."
@@ -12,7 +13,7 @@ function WorkPage() {
       />
       <Work />
       <CtaBanner />
-    </>
+    </PageWrapper>
   )
 }
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import logo from '../assets/logo.png'
 import { siteFlags } from '../data/siteConfig'
+import { createMenuAnimation } from '../utils/motion'
 import Button from './Button'
 import Container from './Container'
 
@@ -21,19 +22,11 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const reduceMotion = useReducedMotion()
   const { pathname } = useLocation()
+  const menuAnimation = createMenuAnimation(reduceMotion)
 
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
-
-  const menuAnimation = reduceMotion
-    ? {}
-    : {
-        initial: { opacity: 0, y: -12 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -12 },
-        transition: { duration: 0.22, ease: 'easeOut' },
-      }
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#05070E]/70 backdrop-blur-xl supports-[backdrop-filter]:bg-[#05070E]/60">
@@ -46,7 +39,7 @@ function Navbar() {
           <img
             src={logo}
             alt="Inaivo Solutions logo"
-            className="h-10 w-10 rounded-full border border-white/15 object-cover shadow-[0_0_0_1px_rgba(29,161,255,0.35),0_8px_30px_rgba(29,161,255,0.25)]"
+            className="h-10 w-10 object-contain"
             loading="eager"
             width="40"
             height="40"
@@ -56,15 +49,17 @@ function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-5 lg:flex" aria-label="Primary Navigation">
+        <nav className="hidden items-center gap-2 lg:flex" aria-label="Primary Navigation">
           {navLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               end={link.end}
               className={({ isActive }) =>
-                `text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1DA1FF] ${
-                  isActive ? 'text-[#EAF0FF]' : 'text-[#A9B4D0] hover:text-[#EAF0FF]'
+                `rounded-full border px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1DA1FF] ${
+                  isActive
+                    ? 'border-[#1DA1FF]/45 bg-[#1DA1FF]/12 text-[#EAF0FF] shadow-[0_0_0_1px_rgba(29,161,255,0.2)]'
+                    : 'border-transparent text-[#A9B4D0] hover:border-white/12 hover:bg-white/[0.03] hover:text-[#EAF0FF]'
                 }`
               }
             >
@@ -103,10 +98,10 @@ function Navbar() {
                   to={link.to}
                   end={link.end}
                   className={({ isActive }) =>
-                    `rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                    `rounded-xl border px-3 py-2 text-sm font-medium transition-all ${
                       isActive
-                        ? 'bg-white/8 text-[#EAF0FF]'
-                        : 'text-[#A9B4D0] hover:bg-white/5 hover:text-[#EAF0FF]'
+                        ? 'border-[#1DA1FF]/40 bg-[#1DA1FF]/10 text-[#EAF0FF]'
+                        : 'border-transparent text-[#A9B4D0] hover:border-white/12 hover:bg-white/5 hover:text-[#EAF0FF]'
                     }`
                   }
                 >

@@ -1,16 +1,10 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import Container from './Container'
+import { createInAnimation } from '../utils/motion'
 
 function PageHeader({ eyebrow, title, subtitle }) {
   const reduceMotion = useReducedMotion()
-
-  const animation = reduceMotion
-    ? {}
-    : {
-        initial: { opacity: 0, y: 16 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.45, ease: 'easeOut' },
-      }
+  const animation = createInAnimation(reduceMotion)
 
   return (
     <section className="pb-10 pt-16 sm:pb-12 sm:pt-20 lg:pb-14 lg:pt-24">

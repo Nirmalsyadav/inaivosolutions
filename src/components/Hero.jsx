@@ -1,27 +1,20 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight, Gauge, Layers3, Rocket, Sparkles } from 'lucide-react'
 import logo from '../assets/logo.png'
+import { createInAnimation } from '../utils/motion'
 import Button from './Button'
 import Container from './Container'
 
+const trustIndicators = [
+  { label: 'Fast Delivery', icon: Rocket },
+  { label: 'Modern Stack', icon: Layers3 },
+  { label: 'Startup Focused', icon: Gauge },
+]
+
 function Hero() {
   const reduceMotion = useReducedMotion()
-
-  const contentAnimation = reduceMotion
-    ? {}
-    : {
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.55, ease: 'easeOut' },
-      }
-
-  const orbAnimation = reduceMotion
-    ? {}
-    : {
-        initial: { opacity: 0, scale: 0.95 },
-        animate: { opacity: 1, scale: 1 },
-        transition: { delay: 0.15, duration: 0.7, ease: 'easeOut' },
-      }
+  const contentAnimation = createInAnimation(reduceMotion)
+  const orbAnimation = createInAnimation(reduceMotion, 0.15)
 
   return (
     <section className="relative overflow-hidden pb-16 pt-16 sm:pb-20 sm:pt-24 lg:pb-24 lg:pt-28">
@@ -31,7 +24,7 @@ function Hero() {
             <img
               src={logo}
               alt="Inaivo Solutions mark"
-              className="h-8 w-8 rounded-full border border-white/15 object-cover"
+              className="h-8 w-8 object-contain"
               width="32"
               height="32"
             />
@@ -40,8 +33,12 @@ function Hero() {
             </span>
           </div>
 
-          <h1 className="font-display text-4xl font-semibold leading-tight tracking-tight text-[#EAF0FF] sm:text-5xl lg:text-6xl">
-            We build modern web apps, SaaS products, and growth-focused digital experiences.
+          <h1 className="font-display text-4xl font-semibold leading-[1.08] tracking-tight text-[#EAF0FF] sm:text-5xl lg:text-6xl">
+            We build modern web apps,
+            <span className="block bg-gradient-to-r from-[#EAF0FF] via-[#9CE8FF] to-[#00D4FF] bg-clip-text text-transparent">
+              SaaS products,
+            </span>
+            and growth-focused digital experiences.
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-[#A9B4D0] sm:text-lg">
             Inaivo Solutions helps ambitious businesses launch faster with scalable engineering, conversion-first design,
@@ -56,6 +53,18 @@ function Hero() {
             <Button to="/services" variant="secondary" size="lg">
               View Services
             </Button>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            {trustIndicators.map((indicator) => (
+              <span
+                key={indicator.label}
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-[#C3CCE2]"
+              >
+                <indicator.icon size={14} className="text-[#00D4FF]" />
+                {indicator.label}
+              </span>
+            ))}
           </div>
 
           <div className="mt-10 flex flex-wrap gap-8">

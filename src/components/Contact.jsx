@@ -1,26 +1,38 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Mail, Send, ShieldCheck } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { AlertTriangle, CheckCircle2, Mail, Send, ShieldCheck } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { services } from '../data/services'
 import Button from './Button'
 import Card from './Card'
 import Container from './Container'
 import SectionTitle from './SectionTitle'
+import TurnstileField from './TurnstileField'
+import { createInAnimation } from '../utils/motion'
 
 const initialForm = {
   name: '',
   email: '',
   service: '',
   message: '',
+  website: '',
 }
 
 const CONTACT_RECEIVER_EMAIL = 'admin@inaivosolutions.com'
-const FORMSUBMIT_ENDPOINT = `https://formsubmit.co/ajax/${CONTACT_RECEIVER_EMAIL}`
+const CONTACT_API_ENDPOINT = import.meta.env.VITE_CONTACT_API_ENDPOINT || '/api/contact'
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || ''
+const CAPTCHA_REQUIRED = import.meta.env.PROD || Boolean(TURNSTILE_SITE_KEY)
+const SUBMIT_COOLDOWN_MS = 15000
+const LAST_SUBMIT_KEY = 'inaivo_last_submit_ts'
 
 function Contact({ showHeader = true }) {
   const [formData, setFormData] = useState(initialForm)
   const [errors, setErrors] = useState({})
+  const [focusedField, setFocusedField] = useState('')
+  const [captchaToken, setCaptchaToken] = useState('')
+  const [captchaWidgetKey, setCaptchaWidgetKey] = useState(0)
+  const [captchaLoadError, setCaptchaLoadError] = useState('')
   const [toastMessage, setToastMessage] = useState('')
+  const [toastType, setToastType] = useState('success')
   const [isSending, setIsSending] = useState(false)
   const reduceMotion = useReducedMotion()
 
@@ -53,6 +65,10 @@ function Contact({ showHeader = true }) {
       nextErrors.message = 'Please add at least 20 characters.'
     }
 
+    if (CAPTCHA_REQUIRED && !captchaToken) {
+      nextErrors.captcha = 'Please complete captcha verification.'
+    }
+
     return nextErrors
   }
 
@@ -64,6 +80,34 @@ function Contact({ showHeader = true }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+
+    if (CAPTCHA_REQUIRED && !TURNSTILE_SITE_KEY) {
+      setToastType('error')
+      setToastMessage('Captcha is not configured. Please set VITE_TURNSTILE_SITE_KEY.')
+      return
+    }
+
+    if (formData.website.trim()) {
+      setToastType('success')
+      setToastMessage('Thanks! Your request has been sent. We will reach out shortly.')
+      return
+    }
+
+    let cooldownRemainingMs = 0
+    try {
+      const lastSubmitTs = Number(window.localStorage.getItem(LAST_SUBMIT_KEY) || 0)
+      cooldownRemainingMs = Math.max(0, SUBMIT_COOLDOWN_MS - (Date.now() - lastSubmitTs))
+    } catch {
+      cooldownRemainingMs = 0
+    }
+
+    if (cooldownRemainingMs > 0) {
+      const cooldownSeconds = Math.ceil(cooldownRemainingMs / 1000)
+      setToastType('error')
+      setToastMessage(`Please wait ${cooldownSeconds}s before sending another request.`)
+      return
+    }
+
     const validationErrors = validateForm()
 
     if (Object.keys(validationErrors).length > 0) {
@@ -74,7 +118,7 @@ function Contact({ showHeader = true }) {
     setIsSending(true)
 
     try {
-      const response = await fetch(FORMSUBMIT_ENDPOINT, {
+      const response = await fetch(CONTACT_API_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,39 +127,88 @@ function Contact({ showHeader = true }) {
         body: JSON.stringify({
           name: formData.name.trim(),
           email: formData.email.trim(),
-          service_type: formData.service,
+          service: formData.service,
           message: formData.message.trim(),
-          _subject: 'New inquiry from Inaivo Solutions website',
+          website: formData.website.trim(),
+          turnstileToken: captchaToken,
         }),
       })
 
+      const result = await response.json().catch(() => ({}))
+
       if (!response.ok) {
-        throw new Error('Failed to send form.')
+        throw new Error(result.message || 'Failed to send form.')
       }
 
       setIsSending(false)
+      try {
+        window.localStorage.setItem(LAST_SUBMIT_KEY, String(Date.now()))
+      } catch {
+        // Ignore storage errors and continue.
+      }
       setFormData(initialForm)
       setErrors({})
+      setCaptchaToken('')
+      setCaptchaLoadError('')
+      if (CAPTCHA_REQUIRED) {
+        setCaptchaWidgetKey((prev) => prev + 1)
+      }
+      setToastType('success')
       setToastMessage('Thanks! Your request has been sent. We will reach out shortly.')
-    } catch {
+    } catch (error) {
       setIsSending(false)
-      setToastMessage('Submission failed. Please email us directly at admin@inaivosolutions.com.')
+      setCaptchaToken('')
+      if (CAPTCHA_REQUIRED) {
+        setCaptchaWidgetKey((prev) => prev + 1)
+      }
+      setToastType('error')
+      setToastMessage(
+        error instanceof Error && error.message
+          ? error.message
+          : `Submission failed. Please email us directly at ${CONTACT_RECEIVER_EMAIL}.`,
+      )
     }
   }
 
-  const inputBaseClass =
-    'h-11 w-full rounded-xl border border-white/12 bg-white/[0.03] px-3 text-sm text-[#EAF0FF] placeholder:text-[#7B86A4] outline-none transition focus:border-[#1DA1FF]/60 focus:ring-2 focus:ring-[#1DA1FF]/20'
+  const handleCaptchaVerify = useCallback((token) => {
+    setCaptchaToken(token)
+    setCaptchaLoadError('')
+    setErrors((prev) => ({ ...prev, captcha: '' }))
+  }, [])
 
-  const textareaClass = `${inputBaseClass} h-auto min-h-32 py-2.5`
+  const handleCaptchaExpire = useCallback(() => {
+    setCaptchaToken('')
+  }, [])
+
+  const handleCaptchaError = useCallback(() => {
+    setCaptchaToken('')
+    setCaptchaLoadError('Captcha failed to load. Refresh and try again.')
+  }, [])
+
+  const inputBaseClass =
+    'h-14 w-full rounded-xl border border-white/12 bg-white/[0.03] px-3 pb-2.5 pt-6 text-sm text-[#EAF0FF] placeholder:text-transparent outline-none transition focus:border-[#1DA1FF]/60 focus:ring-2 focus:ring-[#1DA1FF]/20'
+
+  const textareaClass = `${inputBaseClass} h-auto min-h-36 resize-y`
+  const selectClass = `${inputBaseClass} appearance-none`
+  const isFloating = (fieldName) => focusedField === fieldName || String(formData[fieldName] || '').trim().length > 0
+
+  const getLabelClasses = (fieldName) => {
+    if (fieldName === 'service') {
+      return 'pointer-events-none absolute left-3 top-2.5 -translate-y-0 text-xs text-[#89D7FF]'
+    }
+
+    const floating = isFloating(fieldName)
+    const restingPosition =
+      fieldName === 'message' ? 'top-5 -translate-y-0 text-sm text-[#7B86A4]' : 'top-1/2 -translate-y-1/2 text-sm text-[#7B86A4]'
+
+    return `pointer-events-none absolute left-3 transition-all duration-200 ${
+      floating ? 'top-2.5 -translate-y-0 text-xs text-[#89D7FF]' : restingPosition
+    }`
+  }
 
   const toastAnimation = reduceMotion
     ? {}
-    : {
-        initial: { opacity: 0, y: 12 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: 12 },
-        transition: { duration: 0.2, ease: 'easeOut' },
-      }
+    : createInAnimation(reduceMotion)
 
   return (
     <section className="section-pad pt-8">
@@ -150,51 +243,84 @@ function Contact({ showHeader = true }) {
 
           <Card className="h-full" glow>
             <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-              <div>
-                <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-[#C3CCE2]">
-                  Name
-                </label>
+              <div className="sr-only" aria-hidden="true">
+                <label htmlFor="website">Website</label>
+                <input
+                  id="website"
+                  name="website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={formData.website}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="relative">
                 <input
                   id="name"
                   name="name"
                   type="text"
                   className={inputBaseClass}
-                  placeholder="Your full name"
+                  placeholder=" "
                   value={formData.name}
                   onChange={handleChange}
+                  onFocus={() => setFocusedField('name')}
+                  onBlur={() => setFocusedField('')}
                   aria-invalid={Boolean(errors.name)}
+                  aria-describedby={errors.name ? 'name-error' : undefined}
+                  autoComplete="name"
+                  required
+                  maxLength={80}
                 />
-                {errors.name ? <p className="mt-1 text-xs text-[#FF8FA3]">{errors.name}</p> : null}
+                <label htmlFor="name" className={getLabelClasses('name')}>
+                  Name
+                </label>
+                {errors.name ? (
+                  <p id="name-error" className="mt-1 text-xs text-[#FF8FA3]">
+                    {errors.name}
+                  </p>
+                ) : null}
               </div>
 
-              <div>
-                <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-[#C3CCE2]">
-                  Email
-                </label>
+              <div className="relative">
                 <input
                   id="email"
                   name="email"
                   type="email"
                   className={inputBaseClass}
-                  placeholder="you@company.com"
+                  placeholder=" "
                   value={formData.email}
                   onChange={handleChange}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField('')}
                   aria-invalid={Boolean(errors.email)}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
+                  autoComplete="email"
+                  required
                 />
-                {errors.email ? <p className="mt-1 text-xs text-[#FF8FA3]">{errors.email}</p> : null}
+                <label htmlFor="email" className={getLabelClasses('email')}>
+                  Email
+                </label>
+                {errors.email ? (
+                  <p id="email-error" className="mt-1 text-xs text-[#FF8FA3]">
+                    {errors.email}
+                  </p>
+                ) : null}
               </div>
 
-              <div>
-                <label htmlFor="service" className="mb-1.5 block text-sm font-medium text-[#C3CCE2]">
-                  Service Type
-                </label>
+              <div className="relative">
                 <select
                   id="service"
                   name="service"
-                  className={inputBaseClass}
+                  className={`${selectClass} ${!formData.service ? 'text-[#7B86A4]' : 'text-[#EAF0FF]'}`}
                   value={formData.service}
                   onChange={handleChange}
+                  onFocus={() => setFocusedField('service')}
+                  onBlur={() => setFocusedField('')}
                   aria-invalid={Boolean(errors.service)}
+                  aria-describedby={errors.service ? 'service-error' : undefined}
+                  required
                 >
                   <option value="">Select a service</option>
                   {services.map((service) => (
@@ -203,24 +329,64 @@ function Contact({ showHeader = true }) {
                     </option>
                   ))}
                 </select>
-                {errors.service ? <p className="mt-1 text-xs text-[#FF8FA3]">{errors.service}</p> : null}
+                <label htmlFor="service" className={getLabelClasses('service')}>
+                  Service Type
+                </label>
+                {errors.service ? (
+                  <p id="service-error" className="mt-1 text-xs text-[#FF8FA3]">
+                    {errors.service}
+                  </p>
+                ) : null}
               </div>
 
-              <div>
-                <label htmlFor="message" className="mb-1.5 block text-sm font-medium text-[#C3CCE2]">
-                  Message
-                </label>
+              <div className="relative">
                 <textarea
                   id="message"
                   name="message"
                   className={textareaClass}
-                  placeholder="Tell us about your goals, timeline, and technical requirements."
+                  placeholder=" "
                   value={formData.message}
                   onChange={handleChange}
+                  onFocus={() => setFocusedField('message')}
+                  onBlur={() => setFocusedField('')}
                   aria-invalid={Boolean(errors.message)}
+                  aria-describedby={errors.message ? 'message-error' : undefined}
+                  required
+                  maxLength={2000}
                 />
-                {errors.message ? <p className="mt-1 text-xs text-[#FF8FA3]">{errors.message}</p> : null}
+                <label htmlFor="message" className={getLabelClasses('message')}>
+                  Message
+                </label>
+                {errors.message ? (
+                  <p id="message-error" className="mt-1 text-xs text-[#FF8FA3]">
+                    {errors.message}
+                  </p>
+                ) : null}
               </div>
+
+              {CAPTCHA_REQUIRED ? (
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#89D7FF]">Spam Protection</p>
+                  {TURNSTILE_SITE_KEY ? (
+                    <div className="overflow-x-auto rounded-xl border border-white/12 bg-white/[0.02] p-2">
+                      <TurnstileField
+                        key={captchaWidgetKey}
+                        siteKey={TURNSTILE_SITE_KEY}
+                        onVerify={handleCaptchaVerify}
+                        onExpire={handleCaptchaExpire}
+                        onError={handleCaptchaError}
+                      />
+                    </div>
+                  ) : (
+                    <p className="rounded-xl border border-amber-400/35 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+                      Captcha site key is missing. Add `VITE_TURNSTILE_SITE_KEY` before deploying.
+                    </p>
+                  )}
+
+                  {errors.captcha ? <p className="mt-1 text-xs text-[#FF8FA3]">{errors.captcha}</p> : null}
+                  {captchaLoadError ? <p className="mt-1 text-xs text-[#FF8FA3]">{captchaLoadError}</p> : null}
+                </div>
+              ) : null}
 
               <Button type="submit" className="w-full" disabled={isSending}>
                 {isSending ? 'Sending...' : 'Send Request'}
@@ -234,9 +400,20 @@ function Contact({ showHeader = true }) {
       <AnimatePresence>
         {toastMessage ? (
           <motion.div
-            className="fixed bottom-6 right-6 z-[70] rounded-xl border border-[#1DA1FF]/35 bg-[#070B17]/95 px-4 py-3 text-sm text-[#EAF0FF] shadow-[0_20px_40px_rgba(5,7,14,0.65)]"
+            className={`fixed bottom-6 right-6 z-[70] inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm text-[#EAF0FF] shadow-[0_20px_40px_rgba(5,7,14,0.65)] ${
+              toastType === 'success'
+                ? 'border-emerald-400/35 bg-[#070B17]/95'
+                : 'border-amber-400/35 bg-[#070B17]/95'
+            }`}
+            role={toastType === 'success' ? 'status' : 'alert'}
+            aria-live={toastType === 'success' ? 'polite' : 'assertive'}
             {...toastAnimation}
           >
+            {toastType === 'success' ? (
+              <CheckCircle2 size={16} className="text-emerald-300" />
+            ) : (
+              <AlertTriangle size={16} className="text-amber-300" />
+            )}
             {toastMessage}
           </motion.div>
         ) : null}

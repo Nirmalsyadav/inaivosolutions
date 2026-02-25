@@ -1,16 +1,10 @@
 import { motion, useReducedMotion } from 'framer-motion'
+import { createRevealInView } from '../utils/motion'
 
 function SectionTitle({ eyebrow, title, subtitle, align = 'left' }) {
   const reduceMotion = useReducedMotion()
   const isCentered = align === 'center'
-  const animationProps = reduceMotion
-    ? {}
-    : {
-        initial: { opacity: 0, y: 20 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true, amount: 0.35 },
-        transition: { duration: 0.5, ease: 'easeOut' },
-      }
+  const animationProps = createRevealInView(reduceMotion)
 
   return (
     <motion.div

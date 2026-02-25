@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ExternalLink, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { work } from '../data/work'
 import Button from './Button'
 import Card from './Card'
@@ -10,6 +10,59 @@ import SectionTitle from './SectionTitle'
 function Work({ preview = false }) {
   const [activeProject, setActiveProject] = useState(null)
   const reduceMotion = useReducedMotion()
+  const modalRef = useRef(null)
+  const closeButtonRef = useRef(null)
+  const lastActiveElementRef = useRef(null)
+
+  useEffect(() => {
+    if (!activeProject) return undefined
+
+    lastActiveElementRef.current = document.activeElement
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    closeButtonRef.current?.focus()
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setActiveProject(null)
+        return
+      }
+
+      if (event.key !== 'Tab' || !modalRef.current) return
+
+      const focusableElements = modalRef.current.querySelectorAll(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )
+
+      if (!focusableElements.length) {
+        event.preventDefault()
+        modalRef.current.focus()
+        return
+      }
+
+      const firstFocusable = focusableElements[0]
+      const lastFocusable = focusableElements[focusableElements.length - 1]
+
+      if (event.shiftKey && document.activeElement === firstFocusable) {
+        event.preventDefault()
+        lastFocusable.focus()
+      } else if (!event.shiftKey && document.activeElement === lastFocusable) {
+        event.preventDefault()
+        firstFocusable.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = previousOverflow
+      if (lastActiveElementRef.current && typeof lastActiveElementRef.current.focus === 'function') {
+        lastActiveElementRef.current.focus()
+      }
+    }
+  }, [activeProject])
 
   const cardAnimation = (index) =>
     reduceMotion
@@ -94,6 +147,9 @@ function Work({ preview = false }) {
               role="dialog"
               aria-modal="true"
               aria-label={`${activeProject.title} details`}
+              aria-describedby="project-dialog-description"
+              tabIndex={-1}
+              ref={modalRef}
               className="glass-card max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-white/15 p-6 sm:p-8"
               onClick={(event) => event.stopPropagation()}
               {...modalAnimation}
@@ -106,6 +162,7 @@ function Work({ preview = false }) {
                 <button
                   type="button"
                   aria-label="Close project details"
+                  ref={closeButtonRef}
                   className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-[#C3CCE2] transition-colors hover:text-[#EAF0FF]"
                   onClick={() => setActiveProject(null)}
                 >
@@ -113,7 +170,7 @@ function Work({ preview = false }) {
                 </button>
               </div>
 
-              <div className="mt-7 space-y-5 text-sm leading-relaxed text-[#A9B4D0]">
+              <div id="project-dialog-description" className="mt-7 space-y-5 text-sm leading-relaxed text-[#A9B4D0]">
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#89D7FF]">Challenge</p>
                   <p>{activeProject.challenge}</p>

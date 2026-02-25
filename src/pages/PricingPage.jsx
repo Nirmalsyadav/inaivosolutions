@@ -1,10 +1,11 @@
 import CtaBanner from '../components/CtaBanner'
 import PageHeader from '../components/PageHeader'
+import PageWrapper from '../components/PageWrapper'
 import Pricing from '../components/Pricing'
 
 function PricingPage() {
   return (
-    <>
+    <PageWrapper>
       <PageHeader
         eyebrow="Pricing"
         title="Flexible pricing designed for startup, growth, and scale-stage teams."
@@ -12,7 +13,7 @@ function PricingPage() {
       />
       <Pricing showComparison />
       <CtaBanner />
-    </>
+    </PageWrapper>
   )
 }
 

@@ -1,5 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Outlet, useLocation } from 'react-router-dom'
+import { createPageTransition } from '../utils/motion'
 import BackgroundFX from './BackgroundFX'
 import Footer from './Footer'
 import Navbar from './Navbar'
@@ -8,15 +9,7 @@ import ScrollToTop from './ScrollToTop'
 function GlobalLayout() {
   const location = useLocation()
   const reduceMotion = useReducedMotion()
-
-  const pageAnimation = reduceMotion
-    ? {}
-    : {
-        initial: { opacity: 0, y: 18 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -18 },
-        transition: { duration: 0.32, ease: 'easeOut' },
-      }
+  const pageAnimation = createPageTransition(reduceMotion)
 
   return (
     <div className="relative isolate min-h-screen bg-[#05070E] font-body text-[#EAF0FF]">

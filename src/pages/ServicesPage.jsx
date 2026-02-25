@@ -1,10 +1,11 @@
 import CtaBanner from '../components/CtaBanner'
 import PageHeader from '../components/PageHeader'
+import PageWrapper from '../components/PageWrapper'
 import Services from '../components/Services'
 
 function ServicesPage() {
   return (
-    <>
+    <PageWrapper>
       <PageHeader
         eyebrow="Services"
         title="Engineering, design, and growth services under one delivery team."
@@ -12,7 +13,7 @@ function ServicesPage() {
       />
       <Services />
       <CtaBanner />
-    </>
+    </PageWrapper>
   )
 }
 

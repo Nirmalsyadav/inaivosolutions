@@ -15,9 +15,9 @@ const quickLinks = [
 ]
 
 const socialLinks = [
-  { label: 'LinkedIn', icon: Linkedin, href: '#' },
-  { label: 'Instagram', icon: Instagram, href: '#' },
-  { label: 'Facebook', icon: Facebook, href: '#' },
+  { label: 'LinkedIn', icon: Linkedin, href: 'https://www.linkedin.com/company/inaivosolutions' },
+  { label: 'Instagram', icon: Instagram, href: 'https://www.instagram.com/inaivosolutions' },
+  { label: 'Facebook', icon: Facebook, href: 'https://www.facebook.com/inaivosolutions' },
 ]
 
 function Footer() {
@@ -29,7 +29,7 @@ function Footer() {
             <img
               src={logo}
               alt="Inaivo Solutions logo"
-              className="h-10 w-10 rounded-full border border-white/15 object-cover"
+              className="h-10 w-10 object-contain"
               width="40"
               height="40"
             />
@@ -63,6 +63,8 @@ function Footer() {
                   href={social.href}
                   className="inline-flex items-center gap-2 text-sm text-[#A9B4D0] transition-colors hover:text-[#EAF0FF]"
                   aria-label={social.label}
+                  target="_blank"
+                  rel="noreferrer"
                 >
                   <social.icon size={15} />
                   <span>{social.label}</span>

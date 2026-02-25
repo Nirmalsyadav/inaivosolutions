@@ -1,10 +1,11 @@
 import CtaBanner from '../components/CtaBanner'
 import PageHeader from '../components/PageHeader'
+import PageWrapper from '../components/PageWrapper'
 import Solutions from '../components/Solutions'
 
 function SolutionsPage() {
   return (
-    <>
+    <PageWrapper>
       <PageHeader
         eyebrow="Solutions"
         title="Solution blueprints for SaaS, marketplaces, portals, and startup MVPs."
@@ -12,7 +13,7 @@ function SolutionsPage() {
       />
       <Solutions />
       <CtaBanner />
-    </>
+    </PageWrapper>
   )
 }
 
