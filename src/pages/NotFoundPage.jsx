@@ -1,10 +1,13 @@
 import Button from '../components/Button'
 import Container from '../components/Container'
 import PageWrapper from '../components/PageWrapper'
+import Seo from '../components/Seo'
+import { pageSeo } from '../data/seo'
 
 function NotFoundPage() {
   return (
     <PageWrapper>
+      <Seo {...pageSeo.notFound} noindex />
       <section className="section-pad">
         <Container>
           <div className="glass-card rounded-3xl border border-white/12 p-8 text-center sm:p-12">

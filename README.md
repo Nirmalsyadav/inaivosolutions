@@ -61,6 +61,7 @@ Frontend:
 
 - `VITE_CONTACT_API_ENDPOINT` (default `/api/contact`)
 - `VITE_TURNSTILE_SITE_KEY`
+- `VITE_SITE_URL` (example: `https://www.inaivosolutions.com`)
 
 Backend:
 
@@ -84,6 +85,22 @@ Optional backend email providers:
 
 - route `/api/*` to serverless functions
 - rewrite app routes to `index.html` for React Router SPA routing
+
+## SEO Setup
+
+The project includes:
+
+- route-level dynamic meta tags (`title`, `description`, canonical, Open Graph, Twitter)
+- JSON-LD structured data (`Organization`, `ProfessionalService`, `BreadcrumbList`, `WebPage`)
+- `public/robots.txt`
+- `public/sitemap.xml`
+- SEO assets: `public/favicon.png`, `public/og-image.png`, `public/logo-mark.png`
+
+Before going live:
+
+1. Set `VITE_SITE_URL` to your final production domain.
+2. Update `public/robots.txt` and `public/sitemap.xml` if your domain changes.
+3. Submit `https://your-domain/sitemap.xml` in Google Search Console.
 
 ## Pre-Deploy Checks
 

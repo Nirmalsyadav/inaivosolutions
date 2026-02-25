@@ -1,10 +1,21 @@
 import Contact from '../components/Contact'
 import PageHeader from '../components/PageHeader'
 import PageWrapper from '../components/PageWrapper'
+import Seo from '../components/Seo'
+import { createBreadcrumbSchema, pageSeo } from '../data/seo'
 
 function ContactPage() {
   return (
     <PageWrapper>
+      <Seo
+        {...pageSeo.contact}
+        schema={[
+          createBreadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'Contact', path: '/contact' },
+          ]),
+        ]}
+      />
       <PageHeader
         eyebrow="Contact"
         title="Talk to Inaivo Solutions about your next software initiative."

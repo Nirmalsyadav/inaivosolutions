@@ -23,7 +23,9 @@ import Container from '../components/Container'
 import CtaBanner from '../components/CtaBanner'
 import PageHeader from '../components/PageHeader'
 import PageWrapper from '../components/PageWrapper'
+import Seo from '../components/Seo'
 import SectionTitle from '../components/SectionTitle'
+import { createBreadcrumbSchema, pageSeo } from '../data/seo'
 import { companyStats, missionVision, techStack, whyChooseUs } from '../data/about'
 
 const whyChooseIcons = {
@@ -102,6 +104,15 @@ function AboutPage() {
 
   return (
     <PageWrapper>
+      <Seo
+        {...pageSeo.about}
+        schema={[
+          createBreadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'About', path: '/about' },
+          ]),
+        ]}
+      />
       <PageHeader
         eyebrow="About"
         title="We are a product-first software company focused on outcomes, not output."
