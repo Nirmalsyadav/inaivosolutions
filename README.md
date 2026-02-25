@@ -10,22 +10,22 @@ Production-ready React + Tailwind marketing site with secured contact form suppo
 - React Router DOM
 - lucide-react
 - Vercel Serverless Function (`/api/contact`)
-- Cloudflare Turnstile (captcha verification)
+- Cloudflare Turnstile (optional captcha verification)
+- Nodemailer (SMTP email delivery)
 
 ## Contact Form Security
 
 The contact flow is secured with:
 
 - Server-side input validation and sanitization
-- Cloudflare Turnstile verification on the backend
+- Optional Cloudflare Turnstile verification on the backend
 - Honeypot bot trap
 - IP-based rate limiting on the backend
 - No secret keys exposed to the browser
 
-Email delivery providers:
+Email delivery:
 
-- Default: FormSubmit relay (server-side)
-- Optional: Resend API (recommended for production reliability)
+- Nodemailer via SMTP (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`)
 
 ## Local Development
 
@@ -60,19 +60,24 @@ Set these in local `.env.local` and in Vercel Project Settings -> Environment Va
 Frontend:
 
 - `VITE_CONTACT_API_ENDPOINT` (default `/api/contact`)
-- `VITE_TURNSTILE_SITE_KEY`
+- `VITE_TURNSTILE_ENABLED` (`true` to enable captcha, default `false`)
+- `VITE_TURNSTILE_SITE_KEY` (required only when captcha enabled)
 - `VITE_SITE_URL` (example: `https://www.inaivosolutions.com`)
 
 Backend:
 
-- `TURNSTILE_SECRET_KEY`
+- `TURNSTILE_ENABLED` (`true` to enforce captcha on backend, default `false`)
+- `TURNSTILE_SECRET_KEY` (required only when captcha enabled)
 - `CONTACT_RECEIVER_EMAIL` (example: `admin@inaivosolutions.com`)
 
-Optional backend email providers:
+Backend SMTP:
 
-- `FORMSUBMIT_ENDPOINT`
-- `RESEND_API_KEY`
-- `RESEND_FROM_EMAIL`
+- `SMTP_HOST`
+- `SMTP_PORT` (587 for TLS STARTTLS, 465 for SSL)
+- `SMTP_SECURE` (`true` for 465, otherwise `false`)
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_FROM` (example: `Inaivo Solutions <admin@inaivosolutions.com>`)
 
 ## Deploy (Vercel)
 

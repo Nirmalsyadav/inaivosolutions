@@ -141,74 +141,73 @@ function buildPlainTextEmail({ name, email, service, message, ipAddress }) {
   ].join('\n')
 }
 
-async function sendViaResend(payload, receiverEmail) {
-  const apiKey = process.env.RESEND_API_KEY
-  const fromEmail = process.env.RESEND_FROM_EMAIL
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
 
-  if (!apiKey || !fromEmail) {
-    throw new Error('Resend is not configured.')
+function parseBooleanEnv(value, fallback = false) {
+  if (typeof value !== 'string') return fallback
+  const normalized = value.trim().toLowerCase()
+  if (normalized === 'true') return true
+  if (normalized === 'false') return false
+  return fallback
+}
+
+function parsePort(value, fallback = 587) {
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
+}
+
+async function sendViaNodemailer(payload, receiverEmail) {
+  const smtpHost = process.env.SMTP_HOST
+  const smtpPort = parsePort(process.env.SMTP_PORT, 587)
+  const smtpUser = process.env.SMTP_USER
+  const smtpPass = process.env.SMTP_PASS
+  const smtpSecure = parseBooleanEnv(process.env.SMTP_SECURE, smtpPort === 465)
+  const smtpFrom = process.env.SMTP_FROM || `Inaivo Solutions <${smtpUser}>`
+
+  if (!smtpHost || !smtpUser || !smtpPass) {
+    throw new Error('SMTP configuration is incomplete. Configure SMTP_HOST, SMTP_USER, and SMTP_PASS.')
   }
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
+  const { default: nodemailer } = await import('nodemailer')
+  const safeName = escapeHtml(payload.name)
+  const safeEmail = escapeHtml(payload.email)
+  const safeService = escapeHtml(payload.service)
+  const safeIp = escapeHtml(payload.ipAddress)
+  const safeMessage = escapeHtml(payload.message)
+
+  const transporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpSecure,
+    auth: {
+      user: smtpUser,
+      pass: smtpPass,
     },
-    body: JSON.stringify({
-      from: fromEmail,
-      to: [receiverEmail],
-      reply_to: payload.email,
-      subject: `New website inquiry: ${payload.service}`,
-      text: buildPlainTextEmail(payload),
-    }),
   })
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`Resend error: ${errorText}`)
-  }
-}
-
-async function sendViaFormSubmit(payload, receiverEmail) {
-  const endpoint = process.env.FORMSUBMIT_ENDPOINT || `https://formsubmit.co/ajax/${receiverEmail}`
-
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify({
-      name: payload.name,
-      email: payload.email,
-      service_type: payload.service,
-      message: payload.message,
-      ip_address: payload.ipAddress,
-      _subject: `New website inquiry: ${payload.service}`,
-      _captcha: false,
-      _template: 'table',
-    }),
+  await transporter.sendMail({
+    from: smtpFrom,
+    to: receiverEmail,
+    replyTo: payload.email,
+    subject: `New website inquiry: ${payload.service}`,
+    text: buildPlainTextEmail(payload),
+    html: `
+      <h2>New Inquiry from Inaivo Solutions Website</h2>
+      <p><strong>Name:</strong> ${safeName}</p>
+      <p><strong>Email:</strong> ${safeEmail}</p>
+      <p><strong>Service:</strong> ${safeService}</p>
+      <p><strong>IP:</strong> ${safeIp}</p>
+      <hr />
+      <p style="white-space: pre-wrap;"><strong>Message:</strong><br/>${safeMessage}</p>
+    `,
   })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`FormSubmit error: ${errorText}`)
-  }
-}
-
-async function deliverContactEmail(payload, receiverEmail) {
-  if (process.env.RESEND_API_KEY) {
-    await sendViaResend(payload, receiverEmail)
-    return
-  }
-
-  await sendViaFormSubmit(payload, receiverEmail)
-}
-
-function getSecurityMode() {
-  const isProduction = process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production'
-  return { isProduction }
 }
 
 export default async function handler(request, response) {
@@ -260,16 +259,16 @@ export default async function handler(request, response) {
   }
 
   const turnstileSecret = process.env.TURNSTILE_SECRET_KEY
-  const { isProduction } = getSecurityMode()
+  const captchaEnabled = parseBooleanEnv(process.env.TURNSTILE_ENABLED, false)
 
-  if (!turnstileSecret) {
-    if (isProduction) {
+  if (captchaEnabled) {
+    if (!turnstileSecret) {
       return response.status(500).json({
         ok: false,
-        message: 'Captcha is not configured on the server. Contact support.',
+        message: 'Captcha is enabled but TURNSTILE_SECRET_KEY is missing.',
       })
     }
-  } else {
+
     if (!turnstileToken) {
       return response.status(400).json({ ok: false, message: 'Captcha token is missing.' })
     }
@@ -283,7 +282,7 @@ export default async function handler(request, response) {
   const receiverEmail = process.env.CONTACT_RECEIVER_EMAIL || 'admin@inaivosolutions.com'
 
   try {
-    await deliverContactEmail({ name, email, service, message, ipAddress }, receiverEmail)
+    await sendViaNodemailer({ name, email, service, message, ipAddress }, receiverEmail)
     return response.status(200).json({ ok: true })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown email delivery error.'

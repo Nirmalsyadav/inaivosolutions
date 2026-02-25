@@ -20,7 +20,7 @@ const initialForm = {
 const CONTACT_RECEIVER_EMAIL = 'admin@inaivosolutions.com'
 const CONTACT_API_ENDPOINT = import.meta.env.VITE_CONTACT_API_ENDPOINT || '/api/contact'
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || ''
-const CAPTCHA_REQUIRED = import.meta.env.PROD || Boolean(TURNSTILE_SITE_KEY)
+const CAPTCHA_ENABLED = import.meta.env.VITE_TURNSTILE_ENABLED === 'true' && Boolean(TURNSTILE_SITE_KEY)
 const SUBMIT_COOLDOWN_MS = 15000
 const LAST_SUBMIT_KEY = 'inaivo_last_submit_ts'
 
@@ -65,7 +65,7 @@ function Contact({ showHeader = true }) {
       nextErrors.message = 'Please add at least 20 characters.'
     }
 
-    if (CAPTCHA_REQUIRED && !captchaToken) {
+    if (CAPTCHA_ENABLED && !captchaToken) {
       nextErrors.captcha = 'Please complete captcha verification.'
     }
 
@@ -80,12 +80,6 @@ function Contact({ showHeader = true }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-
-    if (CAPTCHA_REQUIRED && !TURNSTILE_SITE_KEY) {
-      setToastType('error')
-      setToastMessage('Captcha is not configured. Please set VITE_TURNSTILE_SITE_KEY.')
-      return
-    }
 
     if (formData.website.trim()) {
       setToastType('success')
@@ -150,7 +144,7 @@ function Contact({ showHeader = true }) {
       setErrors({})
       setCaptchaToken('')
       setCaptchaLoadError('')
-      if (CAPTCHA_REQUIRED) {
+      if (CAPTCHA_ENABLED) {
         setCaptchaWidgetKey((prev) => prev + 1)
       }
       setToastType('success')
@@ -158,7 +152,7 @@ function Contact({ showHeader = true }) {
     } catch (error) {
       setIsSending(false)
       setCaptchaToken('')
-      if (CAPTCHA_REQUIRED) {
+      if (CAPTCHA_ENABLED) {
         setCaptchaWidgetKey((prev) => prev + 1)
       }
       setToastType('error')
@@ -364,24 +358,18 @@ function Contact({ showHeader = true }) {
                 ) : null}
               </div>
 
-              {CAPTCHA_REQUIRED ? (
+              {CAPTCHA_ENABLED ? (
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#89D7FF]">Spam Protection</p>
-                  {TURNSTILE_SITE_KEY ? (
-                    <div className="overflow-x-auto rounded-xl border border-white/12 bg-white/[0.02] p-2">
-                      <TurnstileField
-                        key={captchaWidgetKey}
-                        siteKey={TURNSTILE_SITE_KEY}
-                        onVerify={handleCaptchaVerify}
-                        onExpire={handleCaptchaExpire}
-                        onError={handleCaptchaError}
-                      />
-                    </div>
-                  ) : (
-                    <p className="rounded-xl border border-amber-400/35 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
-                      Captcha site key is missing. Add `VITE_TURNSTILE_SITE_KEY` before deploying.
-                    </p>
-                  )}
+                  <div className="overflow-x-auto rounded-xl border border-white/12 bg-white/[0.02] p-2">
+                    <TurnstileField
+                      key={captchaWidgetKey}
+                      siteKey={TURNSTILE_SITE_KEY}
+                      onVerify={handleCaptchaVerify}
+                      onExpire={handleCaptchaExpire}
+                      onError={handleCaptchaError}
+                    />
+                  </div>
 
                   {errors.captcha ? <p className="mt-1 text-xs text-[#FF8FA3]">{errors.captcha}</p> : null}
                   {captchaLoadError ? <p className="mt-1 text-xs text-[#FF8FA3]">{captchaLoadError}</p> : null}
