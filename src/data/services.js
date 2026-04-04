@@ -1,74 +1,50 @@
 export const services = [
   {
-    id: 'web-development',
-    title: 'Web Development',
+    id: 'website-development',
+    title: 'Website Development',
     description:
-      'Performance-first marketing and business websites with modern stacks, strong SEO foundations, and clean CMS workflows.',
-    features: [
-      'Responsive UI and conversion-optimized layouts',
-      'Technical SEO and high Core Web Vitals performance',
-      'Scalable architecture for future growth',
-    ],
+      'Scalable, SEO-friendly websites built for performance and conversions using modern stacks and CMS integrations.',
+    features: ['Responsive, conversion-focused layouts', 'SEO & performance-first implementation', 'Content workflows and CMS setup'],
     icon: 'Globe',
   },
   {
-    id: 'web-applications',
-    title: 'Web Applications',
+    id: 'ecommerce-development',
+    title: 'E-Commerce Development',
     description:
-      'Custom interactive applications designed for speed, reliability, and intuitive user journeys across devices.',
-    features: [
-      'Secure authentication and role-based permissions',
-      'API integrations and workflow automation',
-      'Dashboard and operational tool development',
-    ],
-    icon: 'Code2',
-  },
-  {
-    id: 'saas-development',
-    title: 'SaaS Development',
-    description:
-      'Multi-tenant SaaS products with scalable architecture, secure auth, billing integrations, and product analytics.',
-    features: [
-      'Subscription billing and lifecycle management',
-      'Product analytics and growth instrumentation',
-      'Scalable deployment and observability setup',
-    ],
-    icon: 'Rocket',
-  },
-  {
-    id: 'classified-marketplace',
-    title: 'Classified Marketplace Platforms',
-    description:
-      'Marketplace ecosystems with advanced search, listing workflows, moderation tools, and monetization features.',
-    features: [
-      'Advanced search, filtering, and discovery engines',
-      'Seller onboarding and moderation workflows',
-      'Monetization modules and ad placements',
-    ],
+      'End-to-end e-commerce stores with secure payment integrations, inventory workflows, and optimized checkout funnels.',
+    features: ['Payment gateway integrations', 'Optimized checkout & conversion flows', 'Inventory and order management'],
     icon: 'Store',
   },
   {
-    id: 'digital-marketing',
-    title: 'Digital Marketing',
+    id: 'custom-software',
+    title: 'Custom Software Development',
     description:
-      'Growth strategy, paid media, conversion optimization, and funnel automation to drive qualified leads at scale.',
-    features: [
-      'Paid acquisition and channel optimization',
-      'Funnel strategy and conversion experiments',
-      'Analytics dashboards and campaign insights',
-    ],
+      'Custom web applications and back-end systems engineered for reliability, scale, and maintainability.',
+    features: ['API-driven architectures', 'Secure auth and data controls', 'Scalable deployment patterns'],
+    icon: 'Code2',
+  },
+  {
+    id: 'ui-ux-design',
+    title: 'UI/UX Design',
+    description:
+      'Product-focused design systems, UX research, and interfaces that improve usability and conversion.',
+    features: ['User research & wireframes', 'Design systems & visual language', 'High-fidelity UI and prototypes'],
+    icon: 'Palette',
+  },
+  {
+    id: 'it-consulting',
+    title: 'IT Consulting',
+    description:
+      'Strategic technology advisory to align engineering roadmaps with business goals and reduce time-to-market.',
+    features: ['Technical strategy & roadmaps', 'Architecture reviews & optimization', 'Vendor and tooling guidance'],
     icon: 'Megaphone',
   },
   {
-    id: 'branding',
-    title: 'Graphic Design & Branding',
+    id: 'maintenance-support',
+    title: 'Maintenance & Support',
     description:
-      'Brand systems, design language, and visual assets that keep products consistent, polished, and instantly recognizable.',
-    features: [
-      'Visual identity and brand design systems',
-      'Marketing collateral and campaign creatives',
-      'UI assets and product illustration kits',
-    ],
-    icon: 'Palette',
+      'Ongoing maintenance, monitoring, and support to keep systems secure, up-to-date, and performing well.',
+    features: ['Monitoring & incident response', 'Regular security & dependency updates', 'Retainer support and SLAs'],
+    icon: 'Rocket',
   },
 ]

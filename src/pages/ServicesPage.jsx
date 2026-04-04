@@ -3,6 +3,9 @@ import PageHeader from '../components/PageHeader'
 import PageWrapper from '../components/PageWrapper'
 import Seo from '../components/Seo'
 import Services from '../components/Services'
+import WhyChoose from '../components/WhyChoose'
+import Process from '../components/Process'
+import Work from '../components/Work'
 import { createBreadcrumbSchema, pageSeo } from '../data/seo'
 
 function ServicesPage() {
@@ -19,10 +22,20 @@ function ServicesPage() {
       />
       <PageHeader
         eyebrow="Services"
-        title="Engineering, design, and growth services under one delivery team."
-        subtitle="We build digital products that perform, convert, and scale. Every engagement is tailored to your business model and stage."
+        title="IT Services & Consulting"
+        subtitle="We build scalable websites, software, and digital solutions for businesses and startups."
+        primaryCta={{ label: 'Get a Quote', to: '/contact' }}
+        secondaryCta={{ label: 'Contact Us', to: '/contact' }}
       />
+
       <Services />
+
+      <WhyChoose />
+
+      <Process />
+
+      <Work preview />
+
       <CtaBanner />
     </PageWrapper>
   )

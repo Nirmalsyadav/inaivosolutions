@@ -12,6 +12,7 @@ const navLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/about', label: 'About' },
   { to: '/services', label: 'Services' },
+  { to: '/training', label: 'Training' },
   { to: '/solutions', label: 'Solutions' },
   { to: '/work', label: 'Work' },
   ...(siteFlags.showPricing ? [{ to: '/pricing', label: 'Pricing' }] : []),

@@ -56,6 +56,12 @@ export const pageSeo = {
       'Contact Inaivo Solutions to discuss your next software project. Get a practical roadmap for launch, scale, and growth.',
     path: '/contact',
   },
+  training: {
+    title: 'Training & Internship | Inaivo Solutions',
+    description:
+      'Practical training and internship programs focused on MERN, React Native, and Python backend development with real project experience.',
+    path: '/training',
+  },
   pricing: {
     title: 'Pricing | Inaivo Solutions',
     description:

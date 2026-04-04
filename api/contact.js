@@ -12,6 +12,12 @@ const allowedServices = new Set([
   'Classified Marketplace Platforms',
   'Digital Marketing',
   'Graphic Design & Branding',
+  'Training & Internship',
+  'Training - MERN Stack Development',
+  'Training - Java & Spring Boot',
+  'Training - Python Backend Development',
+  'Training - SQL & Databases',
+  'Training - Front-End Development',
 ])
 
 function getClientIp(request) {

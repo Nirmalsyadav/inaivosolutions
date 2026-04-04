@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { AlertTriangle, CheckCircle2, Mail, Send, ShieldCheck } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Mail, Send, ShieldCheck, MapPin } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { services } from '../data/services'
 import Button from './Button'
@@ -227,6 +227,10 @@ function Contact({ showHeader = true }) {
               <p className="flex items-center gap-2">
                 <Mail size={16} className="text-[#00D4FF]" />
                 admin@inaivosolutions.com
+              </p>
+              <p className="flex items-center gap-2">
+                <MapPin size={16} className="text-[#00D4FF]" />
+                Unit 3004, 30 Upper Mallway, Thornhill, Canada
               </p>
               <p className="flex items-center gap-2">
                 <ShieldCheck size={16} className="text-[#00D4FF]" />

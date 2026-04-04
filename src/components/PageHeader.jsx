@@ -1,8 +1,9 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import Container from './Container'
+import Button from './Button'
 import { createInAnimation } from '../utils/motion'
 
-function PageHeader({ eyebrow, title, subtitle }) {
+function PageHeader({ eyebrow, title, subtitle, primaryCta, secondaryCta }) {
   const reduceMotion = useReducedMotion()
   const animation = createInAnimation(reduceMotion)
 
@@ -17,6 +18,22 @@ function PageHeader({ eyebrow, title, subtitle }) {
             {title}
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-relaxed text-[#A9B4D0] sm:text-lg">{subtitle}</p>
+
+          {(primaryCta || secondaryCta) && (
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              {primaryCta ? (
+                <Button to={primaryCta.to || primaryCta.href || '/contact'} size="lg">
+                  {primaryCta.label || 'Get a Quote'}
+                </Button>
+              ) : null}
+
+              {secondaryCta ? (
+                <Button to={secondaryCta.to || secondaryCta.href || '/contact'} variant="secondary" size="lg">
+                  {secondaryCta.label || 'Contact Us'}
+                </Button>
+              ) : null}
+            </div>
+          )}
         </motion.div>
       </Container>
     </section>

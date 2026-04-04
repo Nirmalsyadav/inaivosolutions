@@ -70,7 +70,7 @@ function Services({ preview = false }) {
 
                   {!preview ? (
                     <Button to="/contact" variant="secondary" className="mt-6 w-full">
-                      Talk to our team
+                      Get a Quote
                       <ArrowRight size={16} />
                     </Button>
                   ) : null}

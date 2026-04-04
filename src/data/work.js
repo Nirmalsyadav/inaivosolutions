@@ -1,5 +1,19 @@
 export const work = [
   {
+    id: 'inaixoo-platform',
+    title: 'Inaixoo',
+    category: 'Platform',
+    summary:
+      'A flagship project demonstrating our ability to design and deliver a scalable web product with strong UX and performance.',
+    tags: ['React', 'UX', 'Performance'],
+    challenge:
+      'The client needed a modern, maintainable platform that could scale with user demand while remaining easy to manage.',
+    solution:
+      'We delivered a modular platform with a reusable component library, CI/CD pipelines, and analytics instrumentation.',
+    result:
+      'Improved page performance and reduced release friction, enabling faster feature delivery and better user engagement.',
+  },
+  {
     id: 'nexora-cloud-suite',
     title: 'Nexora Cloud Suite',
     category: 'SaaS Platform',

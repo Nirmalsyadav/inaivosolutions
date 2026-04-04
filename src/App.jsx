@@ -7,6 +7,7 @@ const Home = lazy(() => import('./pages/Home'))
 const ServicesPage = lazy(() => import('./pages/ServicesPage'))
 const SolutionsPage = lazy(() => import('./pages/SolutionsPage'))
 const WorkPage = lazy(() => import('./pages/WorkPage'))
+const TrainingPage = lazy(() => import('./pages/TrainingPage'))
 const PricingPage = lazy(() => import('./pages/PricingPage'))
 const AboutPage = lazy(() => import('./pages/AboutPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
@@ -36,6 +37,7 @@ function App() {
         <Route path="/" element={renderPage(Home)} />
         <Route path="/services" element={renderPage(ServicesPage)} />
         <Route path="/solutions" element={renderPage(SolutionsPage)} />
+        <Route path="/training" element={renderPage(TrainingPage)} />
         <Route path="/work" element={renderPage(WorkPage)} />
         {siteFlags.showPricing ? <Route path="/pricing" element={renderPage(PricingPage)} /> : null}
         <Route path="/about" element={renderPage(AboutPage)} />

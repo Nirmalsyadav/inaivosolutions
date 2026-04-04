@@ -5,29 +5,29 @@ import SectionTitle from './SectionTitle'
 
 const processSteps = [
   {
-    title: 'Discovery',
+    title: 'Requirement Discussion',
     description:
-      'We align on goals, constraints, users, and commercial priorities, then define the strategy and execution map.',
+      'We clarify goals, users, constraints, and business outcomes to form a shared project brief.',
   },
   {
-    title: 'Design',
+    title: 'Planning & Design',
     description:
-      'Wireframes and UI direction are crafted into a cohesive design system focused on usability, conversion, and clarity.',
+      'Wireframes, prototypes, and a clear implementation plan ensure alignment on UX and technical approach.',
   },
   {
     title: 'Development',
     description:
-      'We build in iterative sprints with quality checks, performance tuning, and transparent progress reporting.',
+      'Iterative implementation with regular demos, testing, and performance tuning to keep delivery predictable.',
   },
   {
-    title: 'Launch',
+    title: 'Testing',
     description:
-      'Production release is managed with confidence through QA validation, deployment safeguards, and rollout support.',
+      'Comprehensive QA, cross-device validation, and user acceptance checks before production release.',
   },
   {
-    title: 'Growth',
+    title: 'Deployment & Support',
     description:
-      'Post-launch optimization continues through analytics, experimentation, and product enhancements tied to outcomes.',
+      'Smooth production rollout with monitoring, post-launch support, and optional maintenance retainers.',
   },
 ]
 
